@@ -1,18 +1,21 @@
 import { logger, task, wait } from "@trigger.dev/sdk/v3";
+import { sendNotification } from "../lib/send_notification";
 
 export const helloWorldTask = task({
   id: "hello-world",
-  // Set an optional maxDuration to prevent tasks from running indefinitely
-  maxDuration: 300, // Stop executing after 300 secs (5 mins) of compute
   run: async (payload: {
     [k: string]: string;
   }, { ctx }) => {
     logger.log("Hello, world!", { payload, ctx });
+    const { date, deviceToken, title, body, vibrationLevel } = payload;
 
-    await wait.for({ seconds: 5 });
+    await wait.until({ date: new Date(date) });
+
+    const data = await sendNotification(deviceToken, title, body, vibrationLevel);
 
     return {
       message: "Hello, world!",
+      logs: data
     }
   },
 });
